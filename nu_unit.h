@@ -4,13 +4,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Counts. Initialize these to 0 in your main.c file.
+// Internal counters
 extern int nu_num_checks;
 extern int nu_num_asserts;
 extern int nu_num_failures;
 extern int nu_num_not_impl;
 
-// Initialize the test counters. Call this at the top of your main.c file.
+// Initialize the test counters. Call this above your main() function.
 #define nu_init() \
   int nu_num_checks = 0; \
   int nu_num_asserts = 0; \
@@ -77,14 +77,14 @@ extern int nu_num_not_impl;
     suite(); \
   } while(0)
 
-// Print a message and increment not-implemented counter
+// Print a message and increment the not-implemented counter
 #define nu_not_implemented() \
   do { \
     ++nu_num_not_impl; \
     printf("- test not implemented\n"); \
   } while(0)
 
-// Print a summary of tests. Takes the error message returned from the tests.
+// Print a summary of the testing events
 #define nu_print_summary() \
   do { \
     printf("\n%i checks, %i asserts, %i failures, %i not implemented\n", \
