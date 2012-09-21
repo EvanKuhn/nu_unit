@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+//TODO - support nu_output_level() setter w/ values 'tests' and 'suites'
+
 // Internal counters
 extern int nu_num_checks;
 extern int nu_num_asserts;
@@ -73,8 +75,9 @@ extern int nu_num_not_impl;
 // Run a test suite
 #define nu_run_suite(suite, name) \
   do { \
-    printf("\nsuite: %s\n", name); \
+    printf("suite: %s\n", name); \
     suite(); \
+    printf("\n"); \
   } while(0)
 
 // Print a message and increment the not-implemented counter
@@ -87,7 +90,7 @@ extern int nu_num_not_impl;
 // Print a summary of the testing events
 #define nu_print_summary() \
   do { \
-    printf("\n%i checks, %i asserts, %i failures, %i not implemented\n", \
+    printf("%i checks, %i asserts, %i failures, %i not implemented\n", \
       nu_num_checks, nu_num_asserts, nu_num_failures, nu_num_not_impl); \
     printf(nu_num_failures ? "FAILURE\n" : "SUCCESS\n"); \
   } while(0)
