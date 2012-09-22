@@ -86,13 +86,13 @@ Take a look at the `nu_unit_example.c` file for a slightly longer example.
 
 Below is a list of all the macros included in nu_unit:
 
-- nu_init()
+-  `nu_init()`:
     - Initialize nu_unit. Call before entering your `main()` function.
-- nu_test_level_output()
+-  `nu_test_level_output()`:
     - Set test-level output (the default). Each test's name will be printed.
-- `nu_suite_level_output()`
+- `nu_suite_level_output()`:
     - Set suite-level output. Test names will be omitted.
-- `nu_check(msg, expr)`
+- `nu_check(msg, expr)`:
     - Check that some expression is true. If not, print the message and log the failure.
 - `nu_assert(msg, expr)`     - Assert that some expression is true. If not, print
                                the message, log the failure count, and return from
