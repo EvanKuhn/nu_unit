@@ -86,19 +86,18 @@ Take a look at the `nu_unit_example.c` file for a slightly longer example.
 
 Below is a list of all the macros included in nu_unit:
 
--  `nu_init()`:
-    - Initialize nu_unit. Call before entering your `main()` function.
--  `nu_test_level_output()`:
-    - Set test-level output (the default). Each test's name will be printed.
-- `nu_suite_level_output()`:
-    - Set suite-level output. Test names will be omitted.
-- `nu_check(msg, expr)`:
-    - Check that some expression is true. If not, print the message and log the failure.
+- `nu_init()`                - Initialize nu_unit. Call before entering your
+                               `main()` function.
+- `nu_test_level_output()`   - Set test-level output (the default). Each test's
+                               name will be printed.
+- `nu_suite_level_output()`  - Set suite-level output. Test names will be omitted.
+- `nu_check(msg, expr)`      - Check that some expression is true. If not, print
+                               the message and record a failure.
 - `nu_assert(msg, expr)`     - Assert that some expression is true. If not, print
-                               the message, log the failure count, and return from
+                               the message, record a failure, and return from
                                from the calling function.
-- `nu_fail(msg)`             - Print the message and increment the failure count.
-- `nu_abort(msg)`            - Print the message, log the failure, and return from
+- `nu_fail(msg)`             - Print the message and log a failure.
+- `nu_abort(msg)`            - Print the message, log a failure, and return from
                                the calling function.
 - `nu_run_test(func, name)`  - Run a test function. Print the name to stdout.
 - `nu_run_suite(func, name)` - Run a test-suite function. Print the name to stdout.
@@ -107,16 +106,16 @@ Below is a list of all the macros included in nu_unit:
 - `nu_print_summary()`       - Print the statistics collected during testing:
                                number of checks, asserts, failures, and tests not
                                implemented.
-- `nu_exit()`                - Exit the program via the C `exit()` system call,
-                               returning failure if any checks or asserts failed.
+- `nu_exit()`                - Exit the program via the C `exit()` system call.
+                               Use a return value of 1 if any checks or asserts
+                               failed.
 
 ## Acknowledgements
 
 nu_unit is based on the ultra-simple [MinUnit](http://www.jera.com/techinfo/jtns/jtn002.html),
-which consists of nothing more than two C macros. I began to customize MinUnit
-for my own needs, automating the mundane tasks that MinUnit leaves up to the
-programmer, and adding additional unit-testing functionality. Eventually,
-nu_unit was born.
+which consists of nothing more than two macros. nu_unit is customized to include
+additional functionality and to automate some of the mundane tasks that MinUnit
+leaves up to the programmer.
 
 I hope you like it!
 
