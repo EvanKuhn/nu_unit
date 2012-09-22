@@ -27,8 +27,8 @@ extern char nu_output_level;
   char nu_output_level = 't'
 
 // Set output level
-#define nu_output_level_tests() nu_output_level = NU_TEST_OUTPUT
-#define nu_output_level_suites() nu_output_level = NU_SUITE_OUTPUT
+#define nu_test_level_output() nu_output_level = NU_TEST_OUTPUT
+#define nu_suite_level_output() nu_output_level = NU_SUITE_OUTPUT
 
 // Check that some expression is true. If not:
 // - Increment the failure counter
@@ -46,10 +46,10 @@ extern char nu_output_level;
 // - Increment the failure counter
 // - Print the error message
 // - Exit the current test function
-#define nu_assert(msg, test) \
+#define nu_assert(msg, expr) \
   do { \
     ++nu_num_asserts; \
-    if(!(test)) { \
+    if(!(expr)) { \
       printf("- %s:%i assert failed: %s\n", __FILE__, __LINE__, msg); \
       ++nu_num_failures; \
       return; \
@@ -77,17 +77,17 @@ extern char nu_output_level;
   } while(0)
 
 // Run a test
-#define nu_run_test(test, name) \
+#define nu_run_test(func, name) \
   do { \
     if(nu_output_level == NU_TEST_OUTPUT) printf("test: %s\n", name); \
-    test(); \
+    func(); \
   } while(0)
 
 // Run a test suite
-#define nu_run_suite(suite, name) \
+#define nu_run_suite(func, name) \
   do { \
     printf("suite: %s\n", name); \
-    suite(); \
+    func(); \
     if(nu_output_level == NU_TEST_OUTPUT) printf("\n"); \
   } while(0)
 
