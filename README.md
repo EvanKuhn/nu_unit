@@ -82,9 +82,9 @@ FAILURE
 
 Take a look at the `nu_unit_example.c` file for a slightly longer example.
 
-## Macro List
+## Reference
 
-Below is a list of all the macros included in nu_unit:
+nu_unit is composed of the following macros:
 
 - `nu_init()`                - Initialize nu_unit. Call before entering your
                                `main()` function.
