@@ -123,9 +123,3 @@ nu_unit was born.
 I hope you like it!
 
 -- Evan Kuhn, 2012-09-22
-
-
-[test]
-   asdf asdf asdf
-[test2]
-   asdf asdf asdf asd f
