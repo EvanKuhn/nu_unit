@@ -1,3 +1,3 @@
-nu_unit: C unit-testing framework based on MinUnit
+nu_unit: simple C unit-testing framework
 
 README coming soon...

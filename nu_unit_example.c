@@ -3,31 +3,36 @@
 //==============================================================================
 // Test functions
 //==============================================================================
+// A basic test with an assert that succeeds
 void test_foo() {
   int foo = 1;
   nu_assert("foo isn't 1", foo == 1);
 }
 
+// This test contains a few checks that fail. Notice that a failed check does
+// not cause the function to return.
 void test_math_skills() {
   int bar = 2;
   nu_assert("bar isn't 2", bar == 2);
   nu_check("i can add", 1+1 == 2);
-  nu_check("i can subtract", 5-3 == 1);
+  nu_check("i can subtract", 5-3 == 1);          // This check fails
   nu_check("i can multiply", 7*11 == 77);
-  nu_check("i can divide", 6/2 == 4);
+  nu_check("i can divide", 6/2 == 4);            // And this check fails
 }
 
+// This test isn't implemented yet
 void test_not_impl() {
   nu_not_implemented();
 }
 
+// Here we have an assert that fails, causing the function to return
 void test_cake() {
   int cake = 0;
   int healthy = 1;
   int weight = 200;
   nu_assert("i like food", 1);
-  nu_assert("cake is healthy", cake == healthy);
-  nu_check("my weight is ok", weight < 180);
+  nu_assert("cake is healthy", cake == healthy);  // This assert fails
+  nu_check("my weight is ok", weight < 180);      // This never runs
 }
 
 //==============================================================================
@@ -50,7 +55,7 @@ nu_init();
 
 int main(int argc, char **argv) {
   // You can set the output level to test-level (default) or suite-level
-  //nu_output_level_suites();
+  nu_output_level_suites();
 
   // Run test suites
   nu_run_suite(test_suite1, "suite 1");

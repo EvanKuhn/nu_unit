@@ -1,6 +1,9 @@
 //==============================================================================
-// nu_unit: C unit-testing framework based on MinUnit
+// nu_unit: simple C unit-testing framework
 //==============================================================================
+#ifndef NU_UNIT_H
+#define NU_UNIT_H
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -92,7 +95,7 @@ extern char nu_output_level;
 #define nu_not_implemented() \
   do { \
     ++nu_num_not_impl; \
-    if(nu_output_level == NU_TEST_OUTPUT) printf("- test not implemented\n"); \
+    printf("- %s:%i test not implemented\n", __FILE__, __LINE__); \
   } while(0)
 
 // Print a summary of the testing events
@@ -106,3 +109,5 @@ extern char nu_output_level;
 // Exit with success or failure depending on the number of failures
 #define nu_exit() \
   exit(nu_num_failures ? 1 : 0)
+
+#endif // NU_UNIT_H
