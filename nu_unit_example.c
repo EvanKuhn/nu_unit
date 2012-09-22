@@ -49,6 +49,9 @@ void test_suite2() {
 nu_init();
 
 int main(int argc, char **argv) {
+  // You can set the output level to test-level (default) or suite-level
+  //nu_output_level_suites();
+
   // Run test suites
   nu_run_suite(test_suite1, "suite 1");
   nu_run_suite(test_suite2, "suite 2");

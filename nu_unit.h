@@ -4,20 +4,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-//TODO - support nu_output_level() setter w/ values 'tests' and 'suites'
+// Constants
+#define NU_TEST_OUTPUT 't'
+#define NU_SUITE_OUTPUT 's'
 
 // Internal counters
 extern int nu_num_checks;
 extern int nu_num_asserts;
 extern int nu_num_failures;
 extern int nu_num_not_impl;
+extern char nu_output_level;
 
 // Initialize the test counters. Call this above your main() function.
 #define nu_init() \
   int nu_num_checks = 0; \
   int nu_num_asserts = 0; \
   int nu_num_failures = 0; \
-  int nu_num_not_impl = 0
+  int nu_num_not_impl = 0; \
+  char nu_output_level = 't'
+
+// Set output level
+#define nu_output_level_tests() nu_output_level = NU_TEST_OUTPUT
+#define nu_output_level_suites() nu_output_level = NU_SUITE_OUTPUT
 
 // Check that some expression is true. If not:
 // - Increment the failure counter
@@ -68,7 +76,7 @@ extern int nu_num_not_impl;
 // Run a test
 #define nu_run_test(test, name) \
   do { \
-    printf("test: %s\n", name); \
+    if(nu_output_level == NU_TEST_OUTPUT) printf("test: %s\n", name); \
     test(); \
   } while(0)
 
@@ -77,7 +85,7 @@ extern int nu_num_not_impl;
   do { \
     printf("suite: %s\n", name); \
     suite(); \
-    printf("\n"); \
+    if(nu_output_level == NU_TEST_OUTPUT) printf("\n"); \
   } while(0)
 
 // Print a message and increment the not-implemented counter
