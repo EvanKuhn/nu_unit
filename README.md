@@ -1,23 +1,20 @@
 ## nu_unit: simple C unit-testing framework
 
 nu_unit is a simple unit-testing framework for C. It provides basic unit-testing
-functionality, while still being simple enough to learn in just a few minutes.
-It's a single .h file, so it requires no compiling; just include it directly in
-your source code.
+functionality and is small enough to learn in just a few minutes. It's a single
+.h file, so it requires no compiling; just include it directly in your
+source code.
 
 nu_unit supports:
-* unit tests and test suites
-* checks and asserts
-* marking tests not-implemented
-* custom error messages, with file name and line number
-* basic statistic tracking and reporting
-
-Finally, nu_unit comes with a fully-functional example program that you can
-quickly modify to suit your own testing needs.
+- unit tests and test suites
+- checks and asserts
+- marking tests not-implemented
+- custom error messages, with file name and line number
+- basic statistic tracking and reporting
 
 ## Using nu_unit
 
-A simple example will illustrate nu_unit best:
+An example will illustrate nu_unit best:
 
 ```c
 #include "nu_unit.h"
@@ -64,13 +61,13 @@ In nu_unit, all tests and test suites are functions of the form `void func()`.
 Tests and suites are run via the `nu_run_test()` and `nu_run_suite()` macros,
 respectively. Both of these allow you to name your tests and suites.
 
-Finally, to run your tests, you'll first have to initialize nu_unit via
-`nu_init()`. Then in your main:
-* run your tests/suites.
-* print the summary info (number of checks, asserts, failures, etc).
-* exit with success or failure.
+To run your tests, you'll first have to initialize nu_unit via `nu_init()`.
+Then in your main:
+- run your tests/suites.
+- print the summary info (number of checks, asserts, failures, etc).
+- exit with success or failure.
 
-The example program above will output:
+The example program above will print:
 
 ```
 suite: School Work
@@ -89,33 +86,34 @@ Take a look at the `nu_unit_example.c` file for a slightly longer example.
 
 Below is a list of all the macros included in nu_unit:
 
-* `nu_init()`                - Initialize nu_unit. Call before entering your
-                               `main()` function.
-* `nu_test_level_output()`   - Set test-level output (the default). Each test's
-                               name will be printed.
-* `nu_suite_level_output()`  - Set suite-level output. Test names will be omitted.
-* `nu_check(msg, expr)`      - Check that some expression is true. If not, print
-                               the message and log the failure.
-* `nu_assert(msg, expr)`     - Assert that some expression is true. If not, print
+- `nu_init()`
+    - Initialize nu_unit. Call before entering your `main()` function.
+- `nu_test_level_output()`
+    - Set test-level output (the default). Each test's name will be printed.
+- `nu_suite_level_output()`
+    - Set suite-level output. Test names will be omitted.
+- `nu_check(msg, expr)`
+    - Check that some expression is true. If not, print the message and log the failure.
+- `nu_assert(msg, expr)`     - Assert that some expression is true. If not, print
                                the message, log the failure count, and return from
                                from the calling function.
-* `nu_fail(msg)`             - Print the message and increment the failure count.
-* `nu_abort(msg)`            - Print the message, log the failure, and return from
+- `nu_fail(msg)`             - Print the message and increment the failure count.
+- `nu_abort(msg)`            - Print the message, log the failure, and return from
                                the calling function.
-* `nu_run_test(func, name)`  - Run a test function. Print the name to stdout.
-* `nu_run_suite(func, name)` - Run a test-suite function. Print the name to stdout.
-* `nu_not_implemented()`     - Mark a test as not-implemented, and print a message
+- `nu_run_test(func, name)`  - Run a test function. Print the name to stdout.
+- `nu_run_suite(func, name)` - Run a test-suite function. Print the name to stdout.
+- `nu_not_implemented()`     - Mark a test as not-implemented, and print a message
                                to stdout.
-* `nu_print_summary()`       - Print the statistics collected during testing:
+- `nu_print_summary()`       - Print the statistics collected during testing:
                                number of checks, asserts, failures, and tests not
                                implemented.
-* `nu_exit()`                - Exit the program via the C `exit()` system call,
+- `nu_exit()`                - Exit the program via the C `exit()` system call,
                                returning failure if any checks or asserts failed.
 
 ## Acknowledgements
 
 nu_unit is based on the ultra-simple [MinUnit](http://www.jera.com/techinfo/jtns/jtn002.html),
-which consists of nothing more than two macros. I began to customize MinUnit
+which consists of nothing more than two C macros. I began to customize MinUnit
 for my own needs, automating the mundane tasks that MinUnit leaves up to the
 programmer, and adding additional unit-testing functionality. Eventually,
 nu_unit was born.
