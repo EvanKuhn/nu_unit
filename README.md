@@ -70,6 +70,19 @@ Finally, to run your tests, you'll first have to initialize nu_unit via
 * print the summary info (number of checks, asserts, failures, etc).
 * exit with success or failure.
 
+The example program above will output:
+
+```
+suite: School Work
+test: Math
+- example.c:6 check failed: i can divide
+test: Literature
+- example.c:13 test not implemented
+
+2 checks, 1 asserts, 1 failures, 1 not implemented
+FAILURE
+```
+
 Take a look at the `nu_unit_example.c` file for a slightly longer example.
 
 ## Macro List
