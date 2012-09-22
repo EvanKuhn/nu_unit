@@ -92,7 +92,7 @@ extern char nu_output_level;
 #define nu_not_implemented() \
   do { \
     ++nu_num_not_impl; \
-    printf("- test not implemented\n"); \
+    if(nu_output_level == NU_TEST_OUTPUT) printf("- test not implemented\n"); \
   } while(0)
 
 // Print a summary of the testing events
