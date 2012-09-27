@@ -4,12 +4,15 @@
 #ifndef NU_UNIT_H
 #define NU_UNIT_H
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 // Constants
 #define NU_TEST_OUTPUT 't'
 #define NU_SUITE_OUTPUT 's'
+#define NU_SUITE_BUFLEN 128
 
 // Internal counters
 extern int nu_num_checks;
@@ -17,6 +20,7 @@ extern int nu_num_asserts;
 extern int nu_num_failures;
 extern int nu_num_not_impl;
 extern char nu_output_level;
+extern char nu_target_suite[NU_SUITE_BUFLEN];
 
 // Initialize the test counters. Call this above your main() function.
 #define nu_init() \
@@ -24,7 +28,8 @@ extern char nu_output_level;
   int nu_num_asserts = 0; \
   int nu_num_failures = 0; \
   int nu_num_not_impl = 0; \
-  char nu_output_level = 't'
+  char nu_output_level = 't'; \
+  char nu_target_suite[NU_SUITE_BUFLEN]
 
 // Set output level
 #define nu_test_level_output() nu_output_level = NU_TEST_OUTPUT
@@ -86,9 +91,11 @@ extern char nu_output_level;
 // Run a test suite
 #define nu_run_suite(func, name) \
   do { \
-    printf("suite: %s\n", name); \
-    func(); \
-    if(nu_output_level == NU_TEST_OUTPUT) printf("\n"); \
+    if(!*nu_target_suite || !strcmp(nu_target_suite, name)) { \
+      printf("suite: %s\n", name); \
+      func(); \
+      if(nu_output_level == NU_TEST_OUTPUT) printf("\n"); \
+    } \
   } while(0)
 
 // Print a message and increment the not-implemented counter
@@ -109,5 +116,61 @@ extern char nu_output_level;
 // Exit with success or failure depending on the number of failures
 #define nu_exit() \
   exit(nu_num_failures ? 1 : 0)
+;
+
+// Print usage info. Used by nu_parse_cmdline().
+static void nu_print_usage(const char* program) {
+  if(strstr(program, "./")) program += 2;
+  printf(
+    "USAGE:\n"
+    "  ./%s [options]\n"
+    "\n"
+    "OPTIONS:\n"
+    "  -l <level>   Output level. Accepts: 't', 's', 'test', 'suite'.\n"
+    "  -s <suite>   Test suite to run. By default, all suites are run.\n"
+    "  -h           Show this usage info.\n"
+    , program);
+}
+
+// Parse command-line args and configure nu_unit
+static void nu_parse_cmdline(int argc, char** argv) {
+  char c = 0;
+  opterr = 0;
+
+  while((c = getopt(argc, argv, "l:s:h")) != -1) {
+    switch(c) {
+      case 'l':
+        if(!strcmp(optarg, "t") || !strcmp(optarg, "test")) {
+          nu_output_level = 't';
+        }
+        else if(!strcmp(optarg, "s") || !strcmp(optarg, "suite")) {
+          nu_output_level = 's';
+        }
+        else {
+          fprintf(stderr, "Unknown output level '%s'\n", optarg);
+          exit(1);
+        }
+        break;
+      case 's':
+        bzero(nu_target_suite, NU_SUITE_BUFLEN);
+        snprintf(nu_target_suite, NU_SUITE_BUFLEN, "%s", optarg);
+        break;
+      case 'h':
+        nu_print_usage(argv[0]);
+        exit(0);
+        break;
+      case '?':
+        if(strchr("ls", optopt)) {
+          fprintf(stderr, "Option -%c requires an argument\n", optopt);
+        }
+        else {
+          fprintf(stderr, "Unknown option '-%c'\n", optopt);
+        }
+        exit(1);
+      default:
+        abort();
+    }
+  }
+}
 
 #endif // NU_UNIT_H
