@@ -11,6 +11,7 @@ nu_unit supports:
 - marking tests not-implemented
 - custom error messages, with file name and line number
 - basic statistic tracking and reporting
+- control via command-line options
 
 ## Using nu_unit
 
@@ -42,8 +43,11 @@ void schoolwork_test_suite() {
 nu_init();
 
 int main(int argc, char **argv) {
+  // Parse command-line options accepted by nu_unit
+  nu_parse_cmdline(argc, argv);
+
   // Run test suites
-  nu_run_suite(schoolwork_test_suite, "School Work");
+  nu_run_suite(schoolwork_test_suite, "SchoolWork");
   // add more test suites here...
 
   // Print results and return
@@ -63,6 +67,7 @@ respectively. Both of these allow you to name your tests and suites.
 
 To run your tests, you'll first have to initialize nu_unit via `nu_init()`.
 Then in your main:
+- parse command-line args.
 - run your tests/suites.
 - print the summary info (number of checks, asserts, failures, etc).
 - exit with success or failure.
@@ -70,7 +75,7 @@ Then in your main:
 The example program above will print:
 
 ```
-suite: School Work
+suite: SchoolWork
 test: Math
 - example.c:6 check failed: i can divide
 test: Literature
@@ -88,6 +93,8 @@ nu_unit is composed of the following macros:
 
 - `nu_init()`                - Initialize nu_unit. Call before entering your
                                `main()` function.
+- `nu_parse_cmdline()`       - Parse command-line arguments to allow the user to
+                               run a specific suite or alter the output level.
 - `nu_test_level_output()`   - Set test-level output (the default). Each test's
                                name will be printed.
 - `nu_suite_level_output()`  - Set suite-level output. Test names will be omitted.
