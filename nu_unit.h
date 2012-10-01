@@ -110,12 +110,13 @@ extern char nu_target_suite[NU_SUITE_BUFLEN];
   do { \
     printf("%i checks, %i asserts, %i failures, %i not implemented\n", \
       nu_num_checks, nu_num_asserts, nu_num_failures, nu_num_not_impl); \
-    printf(nu_num_failures ? "FAILURE\n" : "SUCCESS\n"); \
+    int failure = (nu_num_failures || (!nu_num_checks && !nu_num_asserts)); \
+    printf(failure ? "FAILURE\n" : "SUCCESS\n"); \
   } while(0)
 
 // Exit with success or failure depending on the number of failures
 #define nu_exit() \
-  exit(nu_num_failures ? 1 : 0)
+  exit(!(nu_num_failures || (!nu_num_checks && !nu_num_asserts)))
 ;
 
 // Print usage info. Used by nu_parse_cmdline().

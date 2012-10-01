@@ -117,6 +117,8 @@ nu_unit is composed of the following macros:
                                Use a return value of 1 if any checks or asserts
                                failed.
 
+Note: nu_unit considers it a failure if no checks or asserts are performed.
+
 ## Acknowledgements
 
 nu_unit is based on the ultra-simple [MinUnit](http://www.jera.com/techinfo/jtns/jtn002.html),
