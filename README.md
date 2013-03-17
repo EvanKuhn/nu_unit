@@ -20,7 +20,7 @@ An example will illustrate nu_unit best:
 ```c
 #include "nu_unit.h"
 
-// A basic unit-test function
+// Define a basic unit-test, which is just a function
 void test_math() {
   nu_assert("i can add", 1+1 == 2);
   nu_check("i can divide", 323/17 == 8);  // Or can I...?
@@ -30,10 +30,10 @@ void test_math() {
 
 // This test hasn't been implemented yet
 void test_literature() {
-  nu_not_implemented(); // Maybe later...
+  nu_not_implemented(); // We can write the actual test later
 }
 
-// A test-suite function
+// Define a test-suite consisting of the two unit tests above
 void schoolwork_test_suite() {
   nu_run_test(test_math,       "Math");
   nu_run_test(test_literature, "Literature");
@@ -85,7 +85,67 @@ test: Literature
 FAILURE
 ```
 
-Take a look at the `nu_unit_example.c` file for a slightly longer example.
+Take a look at the `nu_unit_example.c` file for an example with two suites.
+
+## Command Line Arguments
+
+The `nu_parse_cmdline()` function adds basic command-line argument parsing,
+allowing you to run a specific suite and control the output level.
+
+Use `-h` to print usage info:
+
+```
+> ./example -h
+USAGE:
+  ./nu_unit_example [options]
+
+OPTIONS:
+  -l <level>   Output level. Accepts: 't', 's', 'test', 'suite'.
+  -s <suite>   Test suite to run. By default, all suites are run.
+  -h           Show this usage info.
+```
+
+The `-l` option allows you to output test-level or suite-level data. Here we
+print each test that's run:
+
+```
+> ./example -l t
+suite: HTTP
+test: http get
+test: http post
+
+suite: FTP
+test: http get
+test: http post
+
+0 checks, 4 asserts, 0 failures, 0 not implemented
+SUCCESS
+```
+
+And here we just print the suite names:
+
+```
+[-] evan@evan-mac:~/dev/nu_unit (master *)
+> ./example -l s
+suite: HTTP
+suite: FTP
+0 checks, 4 asserts, 0 failures, 0 not implemented
+SUCCESS
+```
+
+Errors will always be printed, regardless of the output level.
+
+To run just a single suite, use the `-s` option:
+
+```
+> ./example -s HTTP
+suite: HTTP
+test: http get
+test: http post
+
+0 checks, 2 asserts, 0 failures, 0 not implemented
+SUCCESS
+```
 
 ## Reference
 
