@@ -1,0 +1,6 @@
+2017-03-07, Version 0.0.2
+Changes to existing (un-versioned) code:
+- Add optional colorized output, enabled via '-c' flag.
+- Add '-v' option to print nu_unit version.
+- Add indentation for test-level output
+- Add this ChangeLog!
