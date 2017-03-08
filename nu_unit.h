@@ -32,6 +32,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <stdbool.h>
 #include <string.h>
 
+//------------------------------------------------------------------------------
+// Global variables, constants, etc
+//------------------------------------------------------------------------------
+
 // Version
 #define NU_VERSION "0.0.2"
 
@@ -81,6 +85,9 @@ extern size_t nu_outbuf_free;
   char* nu_outbuf_ptr = nu_outbuf; \
   size_t nu_outbuf_free = sizeof(nu_outbuf)
 
+//------------------------------------------------------------------------------
+// Utilities
+//------------------------------------------------------------------------------
 
 // Save counters so we can determine the status of a test by comparing counters
 // before and after
@@ -101,9 +108,14 @@ void outbuf_append(const char* format, ...) {
   va_list args;
   va_start(args, format);
   size_t n = vsnprintf(nu_outbuf_ptr, nu_outbuf_free, format, args);
+  nu_outbuf_ptr += n;
   nu_outbuf_free = (n > nu_outbuf_free ? 0 : nu_outbuf_free - n);
   va_end(args);
 }
+
+//------------------------------------------------------------------------------
+// Testing macros
+//------------------------------------------------------------------------------
 
 // Print a message and increment the not-implemented counter
 #define nu_not_implemented() \
@@ -111,34 +123,6 @@ void outbuf_append(const char* format, ...) {
     ++nu_num_not_impl; \
     outbuf_append("%s%s- %s:%i test not implemented%s\n", \
       nu_msg_indent, YELLOW, __FILE__, __LINE__, NOCOLOR); \
-  } while(0)
-
-// Check that some expression is true. If not:
-// - Increment the failure counter
-// - Print the error message
-#define nu_check(msg, expr) \
-  do { \
-    ++nu_num_checks; \
-    if(!(expr)) { \
-      outbuf_append("%s%s- %s:%i check failed: %s%s\n", \
-        nu_msg_indent, RED, __FILE__, __LINE__, msg, NOCOLOR); \
-      ++nu_num_failures; \
-    } \
-  } while(0)
-
-// Assert that some expression is true. If not:
-// - Increment the failure counter
-// - Print the error message
-// - Exit the current test function
-#define nu_assert(msg, expr) \
-  do { \
-    ++nu_num_asserts; \
-    if(!(expr)) { \
-      outbuf_append("%s%s- %s:%i assert failed: %s%s\n", \
-        nu_msg_indent, RED, __FILE__, __LINE__, msg, NOCOLOR); \
-      ++nu_num_failures; \
-      return; \
-    } \
   } while(0)
 
 // Log a failure with nu_unit. This will:
@@ -161,39 +145,129 @@ void outbuf_append(const char* format, ...) {
     return; \
   } while(0)
 
-// Run a test
-#define nu_run_test(func, name) \
+// Check that some expression is true. If not:
+// - Increment the failure counter
+#define nu_check(expr) \
   do { \
-    memset(nu_outbuf, 0, sizeof(nu_outbuf)); \
-    nu_outbuf_ptr = nu_outbuf; \
-    nu_outbuf_free = sizeof(nu_outbuf); \
-    nu_save_counters(); \
-    func(); \
-    char* color = nu_test_status_color(); \
-    if(nu_output_level == NU_TEST_OUTPUT) \
-      printf("%s%stest: %s%s\n", nu_test_indent, color, name, NOCOLOR); \
-    printf("%s", nu_outbuf); \
-  } while(0)
-
-// Run a test suite
-#define nu_run_suite(func, name) \
-  do { \
-    if(!*nu_target_suite || !strcmp(nu_target_suite, name)) { \
-      printf("suite: %s\n", name); \
-      func(); \
-      if(nu_output_level == NU_TEST_OUTPUT) printf("\n"); \
+    ++nu_num_checks; \
+    if(!(expr)) { \
+      outbuf_append("%s%s- %s:%i check failed ('%s' is false)%s\n", \
+        nu_msg_indent, RED, __FILE__, __LINE__, #expr, NOCOLOR); \
+      ++nu_num_failures; \
     } \
   } while(0)
 
-// Print a summary of the testing events
-#define nu_print_summary() \
+// Assert that some expression is true. If not:
+// - Increment the failure counter
+// - Exit the current test function
+#define nu_assert(expr) \
   do { \
-    int failure = (nu_num_failures || (!nu_num_checks && !nu_num_asserts)); \
-    char* color = (failure ? RED : GREEN); \
-    printf("%i checks, %i asserts, %i failures, %i not implemented\n", \
-      nu_num_checks, nu_num_asserts, nu_num_failures, nu_num_not_impl); \
-    printf("%s%s%s\n", (failure ? RED : GREEN), (failure ? "FAILURE" : "SUCCESS"), NOCOLOR); \
+    ++nu_num_asserts; \
+    if(!(expr)) { \
+      outbuf_append("%s%s- %s:%i assert failed ('%s' is false)%s\n", \
+        nu_msg_indent, RED, __FILE__, __LINE__, #expr, NOCOLOR); \
+      ++nu_num_failures; \
+      return; \
+    } \
   } while(0)
+
+
+
+/*
+ TODO: add lots more comparison operators!
+nu_check_int_eq (a, b)
+nu_check_int_ne (a, b)
+nu_check_int_lt (a, b)
+nu_check_int_lte(a, b)
+nu_check_int_gt (a, b)
+nu_check_int_gte(a, b)
+*/
+
+
+#define nu_check_int_eq(a, b) \
+  do { \
+    ++nu_num_checks; \
+    if(a != b) { \
+      outbuf_append("%s%s- %s:%i nu_check_int_eq failed (%d != %d)%s\n", \
+        nu_msg_indent, RED, __FILE__, __LINE__, a, b, NOCOLOR); \
+      ++nu_num_failures; \
+    } \
+  } while(0)
+
+#define nu_check_flt_eq(a, b) \
+  do { \
+    ++nu_num_checks; \
+    if(a != b) { \
+      outbuf_append("%s%s- %s:%i nu_check_flt_eq failed (%f != %f)%s\n", \
+        nu_msg_indent, RED, __FILE__, __LINE__, a, b, NOCOLOR); \
+      ++nu_num_failures; \
+    } \
+  } while(0)
+
+#define nu_check_str_eq(a, b) \
+  do { \
+    ++nu_num_checks; \
+    if(a != b) { \
+      outbuf_append("%s%s- %s:%i nu_check_str_eq failed (%s != %s)%s\n", \
+        nu_msg_indent, RED, __FILE__, __LINE__, a, b, NOCOLOR); \
+      ++nu_num_failures; \
+    } \
+  } while(0)
+
+
+
+//------------------------------------------------------------------------------
+// Core nu_unit functions and macros
+//------------------------------------------------------------------------------
+
+// Pointer to a test or suite function w signature: void func(void);
+typedef void (*funcptr)(void);
+
+// Run a test
+#define nu_run_test(func) \
+  do { \
+    nu_run_test_named(func, #func); \
+  } while(0)
+
+void nu_run_test_named(funcptr func, char* name) {
+  // Reset the output buffer
+  memset(nu_outbuf, 0, sizeof(nu_outbuf));
+  nu_outbuf_ptr = nu_outbuf;
+  nu_outbuf_free = sizeof(nu_outbuf);
+
+  // Run test and figure out the status color
+  nu_save_counters();
+  func();
+  char* color = nu_test_status_color();
+
+  // Print colorized output
+  if(nu_output_level == NU_TEST_OUTPUT)
+    printf("%s%stest: %s%s\n", nu_test_indent, color, name, NOCOLOR);
+  printf("%s", nu_outbuf);
+}
+
+// Run a test suite
+#define nu_run_suite(func) \
+  do { \
+    nu_run_suite_named(func, #func); \
+  } while(0)
+
+void nu_run_suite_named(funcptr func, char* name) {
+  if(!*nu_target_suite || !strcmp(nu_target_suite, name)) {
+    printf("suite: %s\n", name);
+    func();
+    if(nu_output_level == NU_TEST_OUTPUT) printf("\n");
+  }
+}
+
+// Print a summary of the testing events
+void nu_print_summary() {
+  int failure = (nu_num_failures || (!nu_num_checks && !nu_num_asserts));
+  char* color = (failure ? RED : GREEN);
+  printf("%i checks, %i asserts, %i failures, %i not implemented\n", \
+    nu_num_checks, nu_num_asserts, nu_num_failures, nu_num_not_impl);
+  printf("%s%s%s\n", (failure ? RED : GREEN), (failure ? "FAILURE" : "SUCCESS"), NOCOLOR);
+}
 
 // Exit with success or failure depending on the number of failures
 #define nu_exit() \
