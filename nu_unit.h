@@ -44,6 +44,25 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define NU_SUITE_OUTPUT 's'
 #define NU_SUITE_BUFLEN 128
 
+// Enum and operator strings for comparison macros
+typedef enum nu_op_e {
+    NU_OP_EQ,
+    NU_OP_NE,
+    NU_OP_LT,
+    NU_OP_LE,
+    NU_OP_GT,
+    NU_OP_GE
+} nu_op_t;
+
+static const char* NU_OPNAMES[6] = {
+  "==",
+  "!=",
+  "<",
+  "<=",
+  ">",
+  ">=",
+};
+
 // Internal counters
 extern int nu_num_checks;
 extern int nu_num_asserts;
@@ -91,20 +110,23 @@ extern size_t nu_outbuf_free;
 
 // Save counters so we can determine the status of a test by comparing counters
 // before and after
-void nu_save_counters() {
+static void nu_save_counters()
+{
   nu_prev_failures = nu_num_failures;
   nu_prev_not_impl = nu_num_not_impl;
 }
 
 // Determine the status of a test by comparing counters before and after.
 // Return the color string, since that's what we're after.
-char* nu_test_status_color() {
+static char* nu_test_status_color()
+{
   if (nu_num_failures > nu_prev_failures) return RED;
   if (nu_num_not_impl > nu_prev_not_impl) return YELLOW;
   return GREEN;
 }
 
-void outbuf_append(const char* format, ...) {
+static void outbuf_append(const char* format, ...)
+{
   va_list args;
   va_start(args, format);
   size_t n = vsnprintf(nu_outbuf_ptr, nu_outbuf_free, format, args);
@@ -151,7 +173,7 @@ void outbuf_append(const char* format, ...) {
   do { \
     ++nu_num_checks; \
     if(!(expr)) { \
-      outbuf_append("%s%s- %s:%i check failed ('%s' is false)%s\n", \
+      outbuf_append("%s%s- %s:%i check failed: expr '%s' is false%s\n", \
         nu_msg_indent, RED, __FILE__, __LINE__, #expr, NOCOLOR); \
       ++nu_num_failures; \
     } \
@@ -164,57 +186,113 @@ void outbuf_append(const char* format, ...) {
   do { \
     ++nu_num_asserts; \
     if(!(expr)) { \
-      outbuf_append("%s%s- %s:%i assert failed ('%s' is false)%s\n", \
+      outbuf_append("%s%s- %s:%i assert failed: expr '%s' is false%s\n", \
         nu_msg_indent, RED, __FILE__, __LINE__, #expr, NOCOLOR); \
       ++nu_num_failures; \
       return; \
     } \
   } while(0)
 
+static void nu_check_int_helper(char* macro, int a, char* a_name, int b, char* b_name,
+  nu_op_t op, char* file, int line)
+{
+  ++nu_num_checks;
+  bool status = false;
 
+  switch (op) {
+    case NU_OP_EQ: status = (a == b); break;
+    case NU_OP_NE: status = (a != b); break;
+    case NU_OP_LT: status = (a <  b); break;
+    case NU_OP_LE: status = (a <= b); break;
+    case NU_OP_GT: status = (a >  b); break;
+    case NU_OP_GE: status = (a >= b); break;
+  }
 
-/*
- TODO: add lots more comparison operators!
-nu_check_int_eq (a, b)
-nu_check_int_ne (a, b)
-nu_check_int_lt (a, b)
-nu_check_int_lte(a, b)
-nu_check_int_gt (a, b)
-nu_check_int_gte(a, b)
-*/
-
+  if (!status) {
+    ++nu_num_failures;
+    outbuf_append("%s%s- %s:%i %s(%s, %s) failed: (%d %s %d) is false%s\n",
+      nu_msg_indent, RED, file, line, macro, a_name, b_name, a, NU_OPNAMES[op], b, NOCOLOR);
+  }
+}
 
 #define nu_check_int_eq(a, b) \
-  do { \
-    ++nu_num_checks; \
-    if(a != b) { \
-      outbuf_append("%s%s- %s:%i nu_check_int_eq failed (%d != %d)%s\n", \
-        nu_msg_indent, RED, __FILE__, __LINE__, a, b, NOCOLOR); \
-      ++nu_num_failures; \
-    } \
-  } while(0)
+  do { nu_check_int_helper("nu_check_int_eq", a, #a, b, #b, NU_OP_EQ, __FILE__, __LINE__); } while(0)
+
+#define nu_check_int_ne(a, b) \
+  do { nu_check_int_helper("nu_check_int_ne", a, #a, b, #b, NU_OP_NE, __FILE__, __LINE__); } while(0)
+
+#define nu_check_int_lt(a, b) \
+  do { nu_check_int_helper("nu_check_int_lt", a, #a, b, #b, NU_OP_LT, __FILE__, __LINE__); } while(0)
+
+#define nu_check_int_le(a, b) \
+  do { nu_check_int_helper("nu_check_int_le", a, #a, b, #b, NU_OP_LE, __FILE__, __LINE__); } while(0)
+
+#define nu_check_int_gt(a, b) \
+  do { nu_check_int_helper("nu_check_int_gt", a, #a, b, #b, NU_OP_GT, __FILE__, __LINE__); } while(0)
+
+#define nu_check_int_ge(a, b) \
+  do { nu_check_int_helper("nu_check_int_ge", a, #a, b, #b, NU_OP_GE, __FILE__, __LINE__); } while(0)
+
+// Yuck. Copy-and-paste the integer function for floats.
+static void nu_check_flt_helper(char* macro, float a, char* a_name, float b, char* b_name,
+  nu_op_t op, char* file, int line)
+{
+  ++nu_num_checks;
+  bool status = false;
+
+  switch (op) {
+    case NU_OP_EQ: status = (a == b); break;
+    case NU_OP_NE: status = (a != b); break;
+    case NU_OP_LT: status = (a <  b); break;
+    case NU_OP_LE: status = (a <= b); break;
+    case NU_OP_GT: status = (a >  b); break;
+    case NU_OP_GE: status = (a >= b); break;
+  }
+
+  if (!status) {
+    ++nu_num_failures;
+    outbuf_append("%s%s- %s:%i %s(%s, %s) failed: (%f %s %f) is false%s\n",
+      nu_msg_indent, RED, file, line, macro, a_name, b_name, a, NU_OPNAMES[op], b, NOCOLOR);
+  }
+}
 
 #define nu_check_flt_eq(a, b) \
-  do { \
-    ++nu_num_checks; \
-    if(a != b) { \
-      outbuf_append("%s%s- %s:%i nu_check_flt_eq failed (%f != %f)%s\n", \
-        nu_msg_indent, RED, __FILE__, __LINE__, a, b, NOCOLOR); \
-      ++nu_num_failures; \
-    } \
-  } while(0)
+  do { nu_check_flt_helper("nu_check_flt_eq", a, #a, b, #b, NU_OP_EQ, __FILE__, __LINE__); } while(0)
+
+#define nu_check_flt_ne(a, b) \
+  do { nu_check_flt_helper("nu_check_flt_ne", a, #a, b, #b, NU_OP_NE, __FILE__, __LINE__); } while(0)
+
+#define nu_check_flt_lt(a, b) \
+  do { nu_check_flt_helper("nu_check_flt_lt", a, #a, b, #b, NU_OP_LT, __FILE__, __LINE__); } while(0)
+
+#define nu_check_flt_le(a, b) \
+  do { nu_check_flt_helper("nu_check_flt_le", a, #a, b, #b, NU_OP_LE, __FILE__, __LINE__); } while(0)
+
+#define nu_check_flt_gt(a, b) \
+  do { nu_check_flt_helper("nu_check_flt_gt", a, #a, b, #b, NU_OP_GT, __FILE__, __LINE__); } while(0)
+
+#define nu_check_flt_ge(a, b) \
+  do { nu_check_flt_helper("nu_check_flt_ge", a, #a, b, #b, NU_OP_GE, __FILE__, __LINE__); } while(0)
 
 #define nu_check_str_eq(a, b) \
   do { \
     ++nu_num_checks; \
-    if(a != b) { \
-      outbuf_append("%s%s- %s:%i nu_check_str_eq failed (%s != %s)%s\n", \
-        nu_msg_indent, RED, __FILE__, __LINE__, a, b, NOCOLOR); \
+    if(strcmp(a,b)) { \
+      outbuf_append("%s%s- %s:%i nu_check_str_eq(%s, %s) failed: (\"%s\" == \"%s\") is false%s\n", \
+        nu_msg_indent, RED, __FILE__, __LINE__, #a, #b, a, b, NOCOLOR); \
       ++nu_num_failures; \
     } \
   } while(0)
 
-
+#define nu_check_str_ne(a, b) \
+  do { \
+    ++nu_num_checks; \
+    if(!strcmp(a,b)) { \
+      outbuf_append("%s%s- %s:%i nu_check_str_ne(%s, %s) failed: (\"%s\" != \"%s\") is false%s\n", \
+        nu_msg_indent, RED, __FILE__, __LINE__, #a, #b, a, b, NOCOLOR); \
+      ++nu_num_failures; \
+    } \
+  } while(0)
 
 //------------------------------------------------------------------------------
 // Core nu_unit functions and macros
@@ -229,7 +307,8 @@ typedef void (*funcptr)(void);
     nu_run_test_named(func, #func); \
   } while(0)
 
-void nu_run_test_named(funcptr func, char* name) {
+static void nu_run_test_named(funcptr func, char* name)
+{
   // Reset the output buffer
   memset(nu_outbuf, 0, sizeof(nu_outbuf));
   nu_outbuf_ptr = nu_outbuf;
@@ -252,7 +331,8 @@ void nu_run_test_named(funcptr func, char* name) {
     nu_run_suite_named(func, #func); \
   } while(0)
 
-void nu_run_suite_named(funcptr func, char* name) {
+static void nu_run_suite_named(funcptr func, char* name)
+{
   if(!*nu_target_suite || !strcmp(nu_target_suite, name)) {
     printf("suite: %s\n", name);
     func();
@@ -261,7 +341,8 @@ void nu_run_suite_named(funcptr func, char* name) {
 }
 
 // Print a summary of the testing events
-void nu_print_summary() {
+void nu_print_summary()
+{
   int failure = (nu_num_failures || (!nu_num_checks && !nu_num_asserts));
   char* color = (failure ? RED : GREEN);
   printf("%i checks, %i asserts, %i failures, %i not implemented\n", \
@@ -275,7 +356,8 @@ void nu_print_summary() {
 ;
 
 // Print usage info. Used by nu_parse_cmdline().
-static void nu_print_usage(const char* program) {
+static void nu_print_usage(const char* program)
+{
   if(strstr(program, "./")) program += 2;
   printf(
     "USAGE:\n"
@@ -291,7 +373,8 @@ static void nu_print_usage(const char* program) {
 }
 
 // Parse command-line args and configure nu_unit
-static void nu_parse_cmdline(int argc, char** argv) {
+static void nu_parse_cmdline(int argc, char** argv)
+{
   char c = 0;
   opterr = 0;
 
