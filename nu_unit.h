@@ -173,7 +173,7 @@ static void _nu_outbuf_append(const char* format, ...)
   do { \
     ++nu_num_checks; \
     if(!(expr)) { \
-      _nu_outbuf_append("%s%s- %s:%i check failed: expr (%s) is false%s\n", \
+      _nu_outbuf_append("%s%s- %s:%i nu_check(%s) failed%s\n", \
         nu_msg_indent, RED, __FILE__, __LINE__, #expr, NOCOLOR); \
       ++nu_num_failures; \
     } \
@@ -186,7 +186,7 @@ static void _nu_outbuf_append(const char* format, ...)
   do { \
     ++nu_num_asserts; \
     if(!(expr)) { \
-      _nu_outbuf_append("%s%s- %s:%i assert failed: expr (%s) is false%s\n", \
+      _nu_outbuf_append("%s%s- %s:%i nu_assert(%s) failed%s\n", \
         nu_msg_indent, RED, __FILE__, __LINE__, #expr, NOCOLOR); \
       ++nu_num_failures; \
       return; \

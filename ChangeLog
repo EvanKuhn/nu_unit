@@ -3,4 +3,6 @@ Changes to existing (un-versioned) code:
 - Add optional colorized output, enabled via '-c' flag.
 - Add '-v' option to print nu_unit version.
 - Add indentation for test-level output
-- Add this ChangeLog!
+- Add comparison check methods that print the inputs and values on error
+  - eg: nu_check_int_eq, nu_check_int_gt, etc
+- Add this ChangeLog

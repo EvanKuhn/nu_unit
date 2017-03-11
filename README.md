@@ -2,14 +2,14 @@
 
 nu_unit is a simple unit-testing framework for C. It provides basic unit-testing
 functionality and is small enough to learn in just a few minutes. It's a single
-.h file, so it requires no compiling; just include it directly in your
-source code.
+.h file, so it requires no compiling; just include it directly in your source code.
 
 nu_unit supports:
 - unit tests and test suites
+- colorized output
 - checks and asserts
 - marking tests not-implemented
-- custom error messages, with file name and line number
+- helpful error messages including: filename, line, input expression and values
 - basic statistic tracking and reporting
 - control via command-line options
 
@@ -21,22 +21,29 @@ An example will illustrate nu_unit best:
 #include "nu_unit.h"
 
 // Define a basic unit-test, which is just a function
-void test_math() {
-  nu_assert("i can add", 1+1 == 2);
-  nu_check("i can divide", 323/17 == 8);  // Or can I...?
-  nu_check("i can multiply", 5*3 == 15);
-  // Add more checks and asserts
+void test_something_simple() {
+  nu_check(1 < 2);
+}
+
+// Show a few different error messages
+void test_int_comparisons() {
+  int five = 5;
+  nu_check_int_eq(five, 5);
+  nu_check_int_ne(five, 5); // Prints an error with input values
+  nu_assert(2 < 1);         // Prints an error with original expression
+  nu_check(2 < 1);          // Won't be run since the assert above failed
 }
 
 // This test hasn't been implemented yet
-void test_literature() {
+void test_not_implemented() {
   nu_not_implemented(); // We can write the actual test later
 }
 
 // Define a test-suite consisting of the two unit tests above
-void schoolwork_test_suite() {
-  nu_run_test(test_math,       "Math");
-  nu_run_test(test_literature, "Literature");
+void example_test_suite() {
+  nu_run_test(test_something_simple);
+  nu_run_test(test_int_comparisons);
+  nu_run_test(test_not_implemented);
 }
 
 // We need to initialize nu_unit before running our tests
@@ -47,7 +54,7 @@ int main(int argc, char **argv) {
   nu_parse_cmdline(argc, argv);
 
   // Run test suites
-  nu_run_suite(schoolwork_test_suite, "SchoolWork");
+  nu_run_suite(example_test_suite);
   // add more test suites here...
 
   // Print results and return
@@ -56,14 +63,14 @@ int main(int argc, char **argv) {
 }
 ```
 
-A test typically consists of calls to `nu_check()` and `nu_assert()`. Upon
-failure, both macros will print an error message and increment the failure
-count. `nu_check()` will allow the function to continue, while `nu_assert()`
-will cause it to return.
+A test typically consists of calls to `nu_check()`, `nu_assert()`, or various
+comparison macros like `nu_check_int_eq()`. Upon failure, these macros will
+print an error message and increment the failure count. A `check` will allow the
+function to continue, while an `assert` will cause it to return.
 
 In nu_unit, all tests and test suites are functions of the form `void func()`.
 Tests and suites are run via the `nu_run_test()` and `nu_run_suite()` macros,
-respectively. Both of these allow you to name your tests and suites.
+respectively.
 
 To run your tests, you'll first have to initialize nu_unit via `nu_init()`.
 Then in your main:
@@ -75,17 +82,20 @@ Then in your main:
 The example program above will print:
 
 ```
-suite: SchoolWork
-test: Math
-- example.c:6 check failed: i can divide
-test: Literature
-- example.c:13 test not implemented
+suite: example_test_suite
+  test: test_something_simple
+  test: test_int_comparisons
+    - small_example.c:12 nu_check_int_ne(five, 5) failed: (5 != 5) is false
+    - small_example.c:13 nu_assert(2 < 1) failed
+  test: test_not_implemented
+    - small_example.c:19 test not implemented
 
-2 checks, 1 asserts, 1 failures, 1 not implemented
+3 checks, 1 asserts, 2 failures, 1 not implemented
 FAILURE
 ```
 
-Take a look at the `nu_unit_example.c` file for an example with two suites.
+Take a look at the `nu_unit_example.c` file for an example with multiple test
+suites, utilizing all nu_unit functionality.
 
 ## Command Line Arguments
 
@@ -102,6 +112,8 @@ USAGE:
 OPTIONS:
   -l <level>   Output level. Accepts: 't', 's', 'test', 'suite'.
   -s <suite>   Test suite to run. By default, all suites are run.
+  -c           Enable colorized output.
+  -v           Print the nu_unit version and exit.
   -h           Show this usage info.
 ```
 
@@ -110,13 +122,13 @@ print each test that's run:
 
 ```
 > ./example -l t
-suite: HTTP
-test: http get
-test: http post
+suite: http_test_suite
+test: test_http_get
+test: test_http_post
 
-suite: FTP
-test: http get
-test: http post
+suite: ftp_test_suite
+test: test_ftp_get
+test: test_ftp_post
 
 0 checks, 4 asserts, 0 failures, 0 not implemented
 SUCCESS
@@ -125,10 +137,9 @@ SUCCESS
 And here we just print the suite names:
 
 ```
-[-] evan@evan-mac:~/dev/nu_unit (master *)
 > ./example -l s
-suite: HTTP
-suite: FTP
+suite: http_test_suite
+suite: ftp_test_suite
 0 checks, 4 asserts, 0 failures, 0 not implemented
 SUCCESS
 ```
@@ -138,10 +149,10 @@ Errors will always be printed, regardless of the output level.
 To run just a single suite, use the `-s` option:
 
 ```
-> ./example -s HTTP
-suite: HTTP
-test: http get
-test: http post
+> ./example -s http_test_suite
+suite: http_test_suite
+test: test_http_get
+test: test_http_post
 
 0 checks, 2 asserts, 0 failures, 0 not implemented
 SUCCESS
@@ -149,27 +160,14 @@ SUCCESS
 
 ## Reference
 
-nu_unit is composed of the following macros:
+nu_unit is composed of a number of macros. Outside of your tests, use:
 
 - `nu_init()`                - Initialize nu_unit. Call before entering your
                                `main()` function.
 - `nu_parse_cmdline()`       - Parse command-line arguments to allow the user to
                                run a specific suite or alter the output level.
-- `nu_test_level_output()`   - Set test-level output (the default). Each test's
-                               name will be printed.
-- `nu_suite_level_output()`  - Set suite-level output. Test names will be omitted.
-- `nu_check(msg, expr)`      - Check that some expression is true. If not, print
-                               the message and record a failure.
-- `nu_assert(msg, expr)`     - Assert that some expression is true. If not, print
-                               the message, record a failure, and return from
-                               from the calling function.
-- `nu_fail(msg)`             - Print the message and log a failure.
-- `nu_abort(msg)`            - Print the message, log a failure, and return from
-                               the calling function.
-- `nu_run_test(func, name)`  - Run a test function. Print the name to stdout.
-- `nu_run_suite(func, name)` - Run a test-suite function. Print the name to stdout.
-- `nu_not_implemented()`     - Mark a test as not-implemented, and print a message
-                               to stdout.
+- `nu_run_test(func)`        - Run a test function. Print its name to stdout.
+- `nu_run_suite(func)`       - Run a test-suite function. Print its name to stdout.
 - `nu_print_summary()`       - Print the statistics collected during testing:
                                number of checks, asserts, failures, and tests not
                                implemented.
@@ -177,15 +175,38 @@ nu_unit is composed of the following macros:
                                Use a return value of 1 if any checks or asserts
                                failed.
 
+Inside your tests, use these macros:
+
+- `nu_not_implemented()`     - Mark a test as not-implemented, and print a message
+                               to stdout.
+- `nu_fail(msg)`             - Print an error message and log a failure.
+- `nu_abort(msg)`            - Print an error message, log a failure, and return
+                               from the calling function.
+- `nu_check(expr)`           - Check that some expression is true. If not, print
+                               an error message and record a failure
+- `nu_assert(expr)`          - Assert that some expression is true. If not, print
+                               an error message, record a failure, and return from
+                               from the calling function.
+- `nu_check_int_eq(a,b)`     - Check integer a == b
+- `nu_check_int_ne(a,b)`     - Check integer a != b
+- `nu_check_int_lt(a,b)`     - Check integer a <  b
+- `nu_check_int_le(a,b)`     - Check integer a <= b
+- `nu_check_int_gt(a,b)`     - Check integer a >  b
+- `nu_check_int_ge(a,b)`     - Check integer a >= b
+- `nu_check_flt_eq(a,b)`     - Check float a == b
+- `nu_check_flt_ne(a,b)`     - Check float a != b
+- `nu_check_flt_lt(a,b)`     - Check float a <  b
+- `nu_check_flt_le(a,b)`     - Check float a <= b
+- `nu_check_flt_gt(a,b)`     - Check float a >  b
+- `nu_check_flt_ge(a,b)`     - Check float a >= b
+- `nu_check_str_eq(a,b)`     - Check string a == b
+- `nu_check_str_ne(a,b)`     - Check string a != b
+
 Note: nu_unit considers it a failure if no checks or asserts are performed.
 
 ## Acknowledgements
 
-nu_unit is based on the ultra-simple [MinUnit](http://www.jera.com/techinfo/jtns/jtn002.html),
+nu_unit was originall based on the ultra-simple [MinUnit](http://www.jera.com/techinfo/jtns/jtn002.html),
 which consists of nothing more than two macros. nu_unit is customized to include
 additional functionality and to automate some of the mundane tasks that MinUnit
-leaves up to the programmer.
-
-I hope you like it!
-
--- Evan Kuhn, 2012-09-22
+leaves up to the programmer. I hope you like it!
