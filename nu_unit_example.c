@@ -1,56 +1,133 @@
 #include "nu_unit.h"
 
 //==============================================================================
-// Test functions
+// Integer comparisons
 //==============================================================================
-// A basic test with an assert that succeeds
-void test_foo() {
-  int foo = 1;
-  nu_assert("foo isn't 1", foo == 1);
+
+void test_good_int_comparisons() {
+  int five = 5;
+  nu_check_int_eq(five, 5);
+  nu_check_int_ne(five, 1);
+  nu_check_int_lt(five, 6);
+  nu_check_int_le(five, 5);
+  nu_check_int_le(five, 6);
+  nu_check_int_gt(five, 4);
+  nu_check_int_ge(five, 4);
+  nu_check_int_ge(five, 5);
 }
 
-// This test contains a few checks that fail. Notice that a failed check does
-// not cause the function to return.
-void test_math_skills() {
-  int bar = 2;
-  nu_assert("bar isn't 2", bar == 2);
-  nu_check("i can add", 1+1 == 2);
-  nu_check("i can subtract", 5-3 == 1);          // This check fails
-  nu_check("i can multiply", 7*11 == 77);
-  nu_check("i can divide", 6/2 == 4);            // And this check fails
+void test_bad_int_comparisons() {
+  int five = 5;
+  nu_check_int_eq(five, 10);
+  nu_check_int_ne(five, 5);
+  nu_check_int_lt(five, 4);
+  nu_check_int_lt(five, 5);
+  nu_check_int_le(five, 4);
+  nu_check_int_gt(five, 6);
+  nu_check_int_gt(five, 5);
+  nu_check_int_ge(five, 6);
 }
 
-// This test isn't implemented yet
-void test_not_impl() {
+void int_comparison_suite() {
+  nu_run_test(test_good_int_comparisons);
+  nu_run_test(test_bad_int_comparisons);
+}
+
+//==============================================================================
+// Floating-point comparisons
+//==============================================================================
+
+void test_good_float_comparisons() {
+  float five = 5.0;
+  nu_check_flt_eq(five, 5.0);
+  nu_check_flt_ne(five, 1.1);
+  nu_check_flt_lt(five, 5.5);
+  nu_check_flt_le(five, 5.0);
+  nu_check_flt_le(five, 6.2);
+  nu_check_flt_gt(five, 4.0);
+  nu_check_flt_ge(five, 4.0);
+  nu_check_flt_ge(five, 5.0);
+}
+
+void test_bad_float_comparisons() {
+  float five = 5.0;
+  nu_check_flt_eq(five, 5.1);
+  nu_check_flt_ne(five, 5.0);
+  nu_check_flt_lt(five, 2.5);
+  nu_check_flt_lt(five, 5.0);
+  nu_check_flt_le(five, 4.2);
+  nu_check_flt_gt(five, 7.1);
+  nu_check_flt_gt(five, 5.0);
+  nu_check_flt_ge(five, 6.0);
+}
+
+void float_comparison_suite() {
+  nu_run_test(test_good_float_comparisons);
+  nu_run_test(test_bad_float_comparisons);
+}
+
+//==============================================================================
+// String comparisons
+//==============================================================================
+
+void test_good_string_comparisons() {
+  char* foo = "foo";
+  nu_check_str_eq(foo, "foo");
+  nu_check_str_ne(foo, "bar");
+}
+
+void test_bad_string_comparisons() {
+  char* foo = "foo";
+  nu_check_str_eq(foo, "bar");
+  nu_check_str_ne(foo, "foo");
+}
+
+void string_comparison_suite() {
+  nu_run_test(test_good_string_comparisons);
+  nu_run_test(test_bad_string_comparisons);
+}
+
+//==============================================================================
+// Miscellaneous nu functionality
+//==============================================================================
+
+void test_not_implemented() {
   nu_not_implemented();
 }
 
-// Here we have an assert that fails, causing the function to return
-void test_cake() {
-  int cake = 0;
-  int healthy = 1;
-  int weight = 200;
-  nu_assert("i like food", 1);
-  nu_assert("cake is healthy", cake == healthy);  // This assert fails
-  nu_check("my weight is ok", weight < 180);      // This never runs
+void test_nu_fail() {
+  nu_fail("This error message will be printed");
+  nu_fail("...and so will this one");
 }
 
-//==============================================================================
-// Test suites
-//==============================================================================
-void test_suite1() {
-  nu_run_test(test_foo,      "foo");
-  nu_run_test(test_not_impl, "procrastination");
+void test_nu_abort() {
+  nu_abort("This error message will be printed");
+  nu_abort("...but this one will not");
 }
 
-void test_suite2() {
-  nu_run_test(test_math_skills, "math skills");
-  nu_run_test(test_cake,        "cake");
+void test_nu_check() {
+  nu_check(1 == 2); // Runs, fails
+  nu_check(1 == 1); // Runs
+}
+
+void test_nu_assert() {
+  nu_assert(1 == 2); // Runs, fails
+  nu_check(1 == 1); // Does not run
+}
+
+void misc_nu_methods_suite() {
+  nu_run_test(test_not_implemented);
+  nu_run_test(test_nu_fail);
+  nu_run_test(test_nu_abort);
+  nu_run_test(test_nu_check);
+  nu_run_test(test_nu_assert);
 }
 
 //==============================================================================
 // Main
 //==============================================================================
+
+// Don't forget to initialize nu_unit!
 nu_init();
 
 int main(int argc, char **argv) {
@@ -58,8 +135,10 @@ int main(int argc, char **argv) {
   nu_parse_cmdline(argc, argv);
 
   // Run test suites
-  nu_run_suite(test_suite1, "suite1");
-  nu_run_suite(test_suite2, "suite2");
+  nu_run_suite(int_comparison_suite);
+  nu_run_suite(float_comparison_suite);
+  nu_run_suite(string_comparison_suite);
+  nu_run_suite(misc_nu_methods_suite);
   // add more test suites here...
 
   // Print results and return
