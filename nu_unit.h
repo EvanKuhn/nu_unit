@@ -110,7 +110,7 @@ extern size_t nu_outbuf_free;
 
 // Save counters so we can determine the status of a test by comparing counters
 // before and after
-static void nu_save_counters()
+static void _nu_save_counters()
 {
   nu_prev_failures = nu_num_failures;
   nu_prev_not_impl = nu_num_not_impl;
@@ -118,14 +118,14 @@ static void nu_save_counters()
 
 // Determine the status of a test by comparing counters before and after.
 // Return the color string, since that's what we're after.
-static char* nu_test_status_color()
+static char* _nu_test_status_color()
 {
   if (nu_num_failures > nu_prev_failures) return RED;
   if (nu_num_not_impl > nu_prev_not_impl) return YELLOW;
   return GREEN;
 }
 
-static void outbuf_append(const char* format, ...)
+static void _nu_outbuf_append(const char* format, ...)
 {
   va_list args;
   va_start(args, format);
@@ -143,7 +143,7 @@ static void outbuf_append(const char* format, ...)
 #define nu_not_implemented() \
   do { \
     ++nu_num_not_impl; \
-    outbuf_append("%s%s- %s:%i test not implemented%s\n", \
+    _nu_outbuf_append("%s%s- %s:%i test not implemented%s\n", \
       nu_msg_indent, YELLOW, __FILE__, __LINE__, NOCOLOR); \
   } while(0)
 
@@ -152,7 +152,7 @@ static void outbuf_append(const char* format, ...)
 // - Print the error message
 #define nu_fail(msg) \
   do { \
-    outbuf_append("%s- %s%s\n", RED, msg, NOCOLOR); \
+    _nu_outbuf_append("%s%s- %s%s\n", nu_msg_indent, RED, msg, NOCOLOR); \
     ++nu_num_failures; \
   } while(0)
 
@@ -162,7 +162,7 @@ static void outbuf_append(const char* format, ...)
 // - Return from the current test function
 #define nu_abort(msg) \
   do { \
-    outbuf_append("%s- %s%s\n", RED, msg, NOCOLOR); \
+    _nu_outbuf_append("%s%s- %s%s\n", nu_msg_indent, RED, msg, NOCOLOR); \
     ++nu_num_failures; \
     return; \
   } while(0)
@@ -173,7 +173,7 @@ static void outbuf_append(const char* format, ...)
   do { \
     ++nu_num_checks; \
     if(!(expr)) { \
-      outbuf_append("%s%s- %s:%i check failed: expr '%s' is false%s\n", \
+      _nu_outbuf_append("%s%s- %s:%i check failed: expr (%s) is false%s\n", \
         nu_msg_indent, RED, __FILE__, __LINE__, #expr, NOCOLOR); \
       ++nu_num_failures; \
     } \
@@ -186,14 +186,14 @@ static void outbuf_append(const char* format, ...)
   do { \
     ++nu_num_asserts; \
     if(!(expr)) { \
-      outbuf_append("%s%s- %s:%i assert failed: expr '%s' is false%s\n", \
+      _nu_outbuf_append("%s%s- %s:%i assert failed: expr (%s) is false%s\n", \
         nu_msg_indent, RED, __FILE__, __LINE__, #expr, NOCOLOR); \
       ++nu_num_failures; \
       return; \
     } \
   } while(0)
 
-static void nu_check_int_helper(char* macro, int a, char* a_name, int b, char* b_name,
+static void _nu_check_int_helper(char* macro, int a, char* a_name, int b, char* b_name,
   nu_op_t op, char* file, int line)
 {
   ++nu_num_checks;
@@ -210,31 +210,31 @@ static void nu_check_int_helper(char* macro, int a, char* a_name, int b, char* b
 
   if (!status) {
     ++nu_num_failures;
-    outbuf_append("%s%s- %s:%i %s(%s, %s) failed: (%d %s %d) is false%s\n",
+    _nu_outbuf_append("%s%s- %s:%i %s(%s, %s) failed: (%d %s %d) is false%s\n",
       nu_msg_indent, RED, file, line, macro, a_name, b_name, a, NU_OPNAMES[op], b, NOCOLOR);
   }
 }
 
 #define nu_check_int_eq(a, b) \
-  do { nu_check_int_helper("nu_check_int_eq", a, #a, b, #b, NU_OP_EQ, __FILE__, __LINE__); } while(0)
+  do { _nu_check_int_helper("nu_check_int_eq", a, #a, b, #b, NU_OP_EQ, __FILE__, __LINE__); } while(0)
 
 #define nu_check_int_ne(a, b) \
-  do { nu_check_int_helper("nu_check_int_ne", a, #a, b, #b, NU_OP_NE, __FILE__, __LINE__); } while(0)
+  do { _nu_check_int_helper("nu_check_int_ne", a, #a, b, #b, NU_OP_NE, __FILE__, __LINE__); } while(0)
 
 #define nu_check_int_lt(a, b) \
-  do { nu_check_int_helper("nu_check_int_lt", a, #a, b, #b, NU_OP_LT, __FILE__, __LINE__); } while(0)
+  do { _nu_check_int_helper("nu_check_int_lt", a, #a, b, #b, NU_OP_LT, __FILE__, __LINE__); } while(0)
 
 #define nu_check_int_le(a, b) \
-  do { nu_check_int_helper("nu_check_int_le", a, #a, b, #b, NU_OP_LE, __FILE__, __LINE__); } while(0)
+  do { _nu_check_int_helper("nu_check_int_le", a, #a, b, #b, NU_OP_LE, __FILE__, __LINE__); } while(0)
 
 #define nu_check_int_gt(a, b) \
-  do { nu_check_int_helper("nu_check_int_gt", a, #a, b, #b, NU_OP_GT, __FILE__, __LINE__); } while(0)
+  do { _nu_check_int_helper("nu_check_int_gt", a, #a, b, #b, NU_OP_GT, __FILE__, __LINE__); } while(0)
 
 #define nu_check_int_ge(a, b) \
-  do { nu_check_int_helper("nu_check_int_ge", a, #a, b, #b, NU_OP_GE, __FILE__, __LINE__); } while(0)
+  do { _nu_check_int_helper("nu_check_int_ge", a, #a, b, #b, NU_OP_GE, __FILE__, __LINE__); } while(0)
 
 // Yuck. Copy-and-paste the integer function for floats.
-static void nu_check_flt_helper(char* macro, float a, char* a_name, float b, char* b_name,
+static void _nu_check_flt_helper(char* macro, float a, char* a_name, float b, char* b_name,
   nu_op_t op, char* file, int line)
 {
   ++nu_num_checks;
@@ -251,34 +251,34 @@ static void nu_check_flt_helper(char* macro, float a, char* a_name, float b, cha
 
   if (!status) {
     ++nu_num_failures;
-    outbuf_append("%s%s- %s:%i %s(%s, %s) failed: (%f %s %f) is false%s\n",
+    _nu_outbuf_append("%s%s- %s:%i %s(%s, %s) failed: (%f %s %f) is false%s\n",
       nu_msg_indent, RED, file, line, macro, a_name, b_name, a, NU_OPNAMES[op], b, NOCOLOR);
   }
 }
 
 #define nu_check_flt_eq(a, b) \
-  do { nu_check_flt_helper("nu_check_flt_eq", a, #a, b, #b, NU_OP_EQ, __FILE__, __LINE__); } while(0)
+  do { _nu_check_flt_helper("nu_check_flt_eq", a, #a, b, #b, NU_OP_EQ, __FILE__, __LINE__); } while(0)
 
 #define nu_check_flt_ne(a, b) \
-  do { nu_check_flt_helper("nu_check_flt_ne", a, #a, b, #b, NU_OP_NE, __FILE__, __LINE__); } while(0)
+  do { _nu_check_flt_helper("nu_check_flt_ne", a, #a, b, #b, NU_OP_NE, __FILE__, __LINE__); } while(0)
 
 #define nu_check_flt_lt(a, b) \
-  do { nu_check_flt_helper("nu_check_flt_lt", a, #a, b, #b, NU_OP_LT, __FILE__, __LINE__); } while(0)
+  do { _nu_check_flt_helper("nu_check_flt_lt", a, #a, b, #b, NU_OP_LT, __FILE__, __LINE__); } while(0)
 
 #define nu_check_flt_le(a, b) \
-  do { nu_check_flt_helper("nu_check_flt_le", a, #a, b, #b, NU_OP_LE, __FILE__, __LINE__); } while(0)
+  do { _nu_check_flt_helper("nu_check_flt_le", a, #a, b, #b, NU_OP_LE, __FILE__, __LINE__); } while(0)
 
 #define nu_check_flt_gt(a, b) \
-  do { nu_check_flt_helper("nu_check_flt_gt", a, #a, b, #b, NU_OP_GT, __FILE__, __LINE__); } while(0)
+  do { _nu_check_flt_helper("nu_check_flt_gt", a, #a, b, #b, NU_OP_GT, __FILE__, __LINE__); } while(0)
 
 #define nu_check_flt_ge(a, b) \
-  do { nu_check_flt_helper("nu_check_flt_ge", a, #a, b, #b, NU_OP_GE, __FILE__, __LINE__); } while(0)
+  do { _nu_check_flt_helper("nu_check_flt_ge", a, #a, b, #b, NU_OP_GE, __FILE__, __LINE__); } while(0)
 
 #define nu_check_str_eq(a, b) \
   do { \
     ++nu_num_checks; \
     if(strcmp(a,b)) { \
-      outbuf_append("%s%s- %s:%i nu_check_str_eq(%s, %s) failed: (\"%s\" == \"%s\") is false%s\n", \
+      _nu_outbuf_append("%s%s- %s:%i nu_check_str_eq(%s, %s) failed: (\"%s\" == \"%s\") is false%s\n", \
         nu_msg_indent, RED, __FILE__, __LINE__, #a, #b, a, b, NOCOLOR); \
       ++nu_num_failures; \
     } \
@@ -288,7 +288,7 @@ static void nu_check_flt_helper(char* macro, float a, char* a_name, float b, cha
   do { \
     ++nu_num_checks; \
     if(!strcmp(a,b)) { \
-      outbuf_append("%s%s- %s:%i nu_check_str_ne(%s, %s) failed: (\"%s\" != \"%s\") is false%s\n", \
+      _nu_outbuf_append("%s%s- %s:%i nu_check_str_ne(%s, %s) failed: (\"%s\" != \"%s\") is false%s\n", \
         nu_msg_indent, RED, __FILE__, __LINE__, #a, #b, a, b, NOCOLOR); \
       ++nu_num_failures; \
     } \
@@ -315,9 +315,9 @@ static void nu_run_test_named(funcptr func, char* name)
   nu_outbuf_free = sizeof(nu_outbuf);
 
   // Run test and figure out the status color
-  nu_save_counters();
+  _nu_save_counters();
   func();
-  char* color = nu_test_status_color();
+  char* color = _nu_test_status_color();
 
   // Print colorized output
   if(nu_output_level == NU_TEST_OUTPUT)

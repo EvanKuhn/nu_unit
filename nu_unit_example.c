@@ -1,7 +1,7 @@
 #include "nu_unit.h"
 
 //==============================================================================
-// Test functions
+// Integer comparisons
 //==============================================================================
 
 void test_good_int_comparisons() {
@@ -28,6 +28,15 @@ void test_bad_int_comparisons() {
   nu_check_int_ge(five, 6);
 }
 
+void int_comparison_suite() {
+  nu_run_test(test_good_int_comparisons);
+  nu_run_test(test_bad_int_comparisons);
+}
+
+//==============================================================================
+// Floating-point comparisons
+//==============================================================================
+
 void test_good_float_comparisons() {
   float five = 5.0;
   nu_check_flt_eq(five, 5.0);
@@ -52,6 +61,15 @@ void test_bad_float_comparisons() {
   nu_check_flt_ge(five, 6.0);
 }
 
+void float_comparison_suite() {
+  nu_run_test(test_good_float_comparisons);
+  nu_run_test(test_bad_float_comparisons);
+}
+
+//==============================================================================
+// String comparisons
+//==============================================================================
+
 void test_good_string_comparisons() {
   char* foo = "foo";
   nu_check_str_eq(foo, "foo");
@@ -64,23 +82,45 @@ void test_bad_string_comparisons() {
   nu_check_str_ne(foo, "foo");
 }
 
-//==============================================================================
-// Test suites
-//==============================================================================
-
-void int_comparison_suite() {
-  nu_run_test(test_good_int_comparisons);
-  nu_run_test(test_bad_int_comparisons);
-}
-
-void float_comparison_suite() {
-  nu_run_test(test_good_float_comparisons);
-  nu_run_test(test_bad_float_comparisons);
-}
-
 void string_comparison_suite() {
   nu_run_test(test_good_string_comparisons);
   nu_run_test(test_bad_string_comparisons);
+}
+
+//==============================================================================
+// Miscellaneous nu functionality
+//==============================================================================
+
+void test_not_implemented() {
+  nu_not_implemented();
+}
+
+void test_nu_fail() {
+  nu_fail("This error message will be printed");
+  nu_fail("...and so will this one");
+}
+
+void test_nu_abort() {
+  nu_abort("This error message will be printed");
+  nu_abort("...but this one will not");
+}
+
+void test_nu_check() {
+  nu_check(1 == 2); // Runs, fails
+  nu_check(1 == 1); // Runs
+}
+
+void test_nu_assert() {
+  nu_assert(1 == 2); // Runs, fails
+  nu_check(1 == 1); // Does not run
+}
+
+void misc_nu_methods_suite() {
+  nu_run_test(test_not_implemented);
+  nu_run_test(test_nu_fail);
+  nu_run_test(test_nu_abort);
+  nu_run_test(test_nu_check);
+  nu_run_test(test_nu_assert);
 }
 
 //==============================================================================
@@ -98,6 +138,7 @@ int main(int argc, char **argv) {
   nu_run_suite(int_comparison_suite);
   nu_run_suite(float_comparison_suite);
   nu_run_suite(string_comparison_suite);
+  nu_run_suite(misc_nu_methods_suite);
   // add more test suites here...
 
   // Print results and return
