@@ -37,7 +37,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //------------------------------------------------------------------------------
 
 // Version
-#define NU_VERSION "1.0.0"
+#define NU_VERSION "1.0.1"
 
 // Constants
 #define NU_TEST_OUTPUT 't'
@@ -190,6 +190,30 @@ static void _nu_outbuf_append(const char* format, ...)
         nu_msg_indent, RED, __FILE__, __LINE__, #expr, NOCOLOR); \
       ++nu_num_failures; \
       return; \
+    } \
+  } while(0)
+
+// Check that some expression evaluates to null. If not:
+// - Increment the failure counter
+#define nu_check_null(expr) \
+  do { \
+    ++nu_num_checks; \
+    if((expr) != NULL) { \
+      _nu_outbuf_append("%s%s- %s:%i nu_check_null(%s) failed%s\n", \
+        nu_msg_indent, RED, __FILE__, __LINE__, #expr, NOCOLOR); \
+      ++nu_num_failures; \
+    } \
+  } while(0)
+
+// Check that some expression evaluates to not null. If not:
+// - Increment the failure counter
+#define nu_check_not_null(expr) \
+  do { \
+    ++nu_num_checks; \
+    if((expr) == NULL) { \
+      _nu_outbuf_append("%s%s- %s:%i nu_check_not_null(%s) failed%s\n", \
+        nu_msg_indent, RED, __FILE__, __LINE__, #expr, NOCOLOR); \
+      ++nu_num_failures; \
     } \
   } while(0)
 

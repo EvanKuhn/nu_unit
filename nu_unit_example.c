@@ -136,12 +136,28 @@ void test_nu_assert() {
   nu_check(1 == 1); // Does not run
 }
 
+void test_nu_check_null() {
+  char* i_am_null = NULL;
+  char* not_null = "i'm not null";
+  nu_check_null(i_am_null);
+  nu_check_null(not_null);
+}
+
+void test_nu_check_not_null() {
+  char* i_am_null = NULL;
+  char* not_null = "i'm not null";
+  nu_check_not_null(i_am_null);
+  nu_check_not_null(not_null);
+}
+
 void misc_nu_methods_suite() {
   nu_run_test(test_not_implemented);
   nu_run_test(test_nu_fail);
   nu_run_test(test_nu_abort);
   nu_run_test(test_nu_check);
   nu_run_test(test_nu_assert);
+  nu_run_test(test_nu_check_null);
+  nu_run_test(test_nu_check_not_null);
 }
 
 //==============================================================================
