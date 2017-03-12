@@ -37,7 +37,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //------------------------------------------------------------------------------
 
 // Version
-#define NU_VERSION "0.0.2"
+#define NU_VERSION "1.0.0"
 
 // Constants
 #define NU_TEST_OUTPUT 't'
