@@ -133,7 +133,17 @@ void test_nu_check() {
 
 void test_nu_assert() {
   nu_assert(1 == 2); // Runs, fails
-  nu_check(1 == 1); // Does not run
+  nu_check(1 == 1);  // Does not run
+}
+
+void test_nu_check_true() {
+  nu_check_true(1 == 1); // Succeeds
+  nu_check_true(1 == 2); // Fails
+}
+
+void test_nu_check_false() {
+  nu_check_false(1 == 1); // Fails
+  nu_check_false(1 == 2); // Succeeds
 }
 
 void test_nu_check_null() {
@@ -156,6 +166,8 @@ void misc_nu_methods_suite() {
   nu_run_test(test_nu_abort);
   nu_run_test(test_nu_check);
   nu_run_test(test_nu_assert);
+  nu_run_test(test_nu_check_true);
+  nu_run_test(test_nu_check_false);
   nu_run_test(test_nu_check_null);
   nu_run_test(test_nu_check_not_null);
 }
