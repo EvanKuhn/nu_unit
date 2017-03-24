@@ -241,7 +241,7 @@ static void _nu_outbuf_append(const char* format, ...)
     } \
   } while(0)
 
-static void _nu_check_int_helper(char* macro, int a, char* a_name, int b, char* b_name,
+static inline void _nu_check_int_helper(char* macro, int a, char* a_name, int b, char* b_name,
   nu_op_t op, char* file, int line)
 {
   ++nu_num_checks;
@@ -282,7 +282,7 @@ static void _nu_check_int_helper(char* macro, int a, char* a_name, int b, char* 
   do { _nu_check_int_helper("nu_check_int_ge", a, #a, b, #b, NU_OP_GE, __FILE__, __LINE__); } while(0)
 
 // Yuck. Copy-and-paste the integer function for floats.
-static void _nu_check_flt_helper(char* macro, float a, char* a_name, float b, char* b_name,
+static inline void _nu_check_flt_helper(char* macro, float a, char* a_name, float b, char* b_name,
   nu_op_t op, char* file, int line)
 {
   ++nu_num_checks;
@@ -393,9 +393,10 @@ void nu_print_summary()
 {
   int failure = (nu_num_failures || (!nu_num_checks && !nu_num_asserts));
   char* color = (failure ? RED : GREEN);
+  char* status = (failure ? "FAILURE" : "SUCCESS");
   printf("%i checks, %i asserts, %i failures, %i not implemented\n", \
     nu_num_checks, nu_num_asserts, nu_num_failures, nu_num_not_impl);
-  printf("%s%s%s\n", (failure ? RED : GREEN), (failure ? "FAILURE" : "SUCCESS"), NOCOLOR);
+  printf("%s%s%s\n", color, status, NOCOLOR);
 }
 
 // Exit with success or failure depending on the number of failures
